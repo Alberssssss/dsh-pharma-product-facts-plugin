@@ -8,10 +8,10 @@
     "dsh-plugin",
     "pharma"
   ],
-  "homepage": "http://115.159.220.241:9090/Albert/dsh-pharma-product-facts",
+  "homepage": "https://github.com/Alberssssss/dsh-pharma-product-facts-plugin#readme",
   "repository": {
     "type": "git",
-    "url": "git+http://115.159.220.241:9090/Albert/dsh-pharma-product-facts.git"
+    "url": "git+https://github.com/Alberssssss/dsh-pharma-product-facts-plugin.git"
   },
   "type": "module",
   "main": "lib/index.js",

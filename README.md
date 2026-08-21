@@ -6,10 +6,10 @@ Standalone DSH profile bundle that installs the `pharma-product-facts` skill pro
 
 ## One-command installation
 
-The GitLab project is private. After GitLab access and Git credentials for `115.159.220.241:9090` are configured, install both the skill and router into the `web` profile with one command:
+Install both the skill and router into the `web` profile with one command:
 
 ```sh
-dsh plugin --profile web add 'git+http://Albert@115.159.220.241:9090/Albert/dsh-pharma-product-facts.git#main'
+dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 ```
 
 The repository commits its built `lib/` output and has no install-time build script, so Git installation does not require pnpm build approval.
@@ -84,6 +84,6 @@ The catalog preserves the stable prefix for a fixed enabled composition. The loa
 
 ## Known Limitations and Deferred Work
 
-- The package is private and experimental. Installers need access to the `Albert/dsh-pharma-product-facts` GitLab project; it is not an official DSH release dependency.
+- The package is an external experimental plugin, not an official DSH release dependency.
 - The deterministic router is a recommendation, not a dispatcher or proof of skill use; session evidence must distinguish the route hint from the later `skill` tool call.
 - The packaged workflow retains external Hermes-compatible medical retrieval dependencies and cannot independently provide live CDE evidence.

@@ -6,10 +6,10 @@
 
 ## 单命令安装
 
-该 GitLab 项目是私有项目。安装者取得项目访问权限并为 `115.159.220.241:9090` 配置 Git 凭据后，可用一条命令把 skill 和 router 同时安装到 `web` profile：
+用一条命令把 skill 和 router 同时安装到 `web` profile：
 
 ```sh
-dsh plugin --profile web add 'git+http://Albert@115.159.220.241:9090/Albert/dsh-pharma-product-facts.git#main'
+dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 ```
 
 仓库已提交构建后的 `lib/`，并且没有安装时构建脚本，因此通过 Git 安装不需要 pnpm 构建授权。
@@ -84,6 +84,6 @@ Router 应用以下规则：
 
 ## 已知限制与延后工作
 
-- 本包为私有实验性包；安装者必须能访问 GitLab 项目 `Albert/dsh-pharma-product-facts`，它不属于 DSH 正式发布依赖。
+- 本包为外部实验性插件，不属于 DSH 正式发布依赖。
 - 确定性 router 只提供建议，不是 dispatcher，也不能证明 skill 已被使用；会话证据必须区分路由提示与后续 `skill` 工具调用。
 - 包内工作流仍依赖兼容 Hermes 的外部医学检索资源，无法独立提供实时 CDE 证据。
