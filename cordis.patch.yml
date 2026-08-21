@@ -1,5 +1,5 @@
-# One row owns the bundled skill provider and its soft router, so a profile
-# override can enable or disable both together.
+# One row owns the bundled skill provider, native tools, and soft router, so a
+# profile override can configure, enable, or disable them together.
 - insert:
     - id: pharma-product-facts
       name: dsh-pharma-product-facts

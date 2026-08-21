@@ -6,6 +6,8 @@ import AgentRegistry, { agentEvents, Inbox, type Agent, type PreStepDecision } f
 import { createUserMessage, type UserMessage } from '@deepseek-ai/dsh-llm'
 import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
 import SkillRegistry from '@deepseek-ai/dsh-skill'
+import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import ToolRuntime from '@deepseek-ai/dsh-tools'
 import { describe, expect, it } from 'vitest'
 import * as PharmaProductFacts from '../src/index.ts'
 import {
@@ -13,11 +15,14 @@ import {
   ROUTER_HINT,
   ROUTER_SOURCE,
 } from '../src/router.ts'
+import { FETCH_SOURCE_TOOL, FINALIZE_TOOL } from '../src/tools.ts'
 
 async function setup() {
   const ctx = new Context()
   await ctx.plugin(SessionStore)
   await ctx.plugin(AgentRegistry)
+  await ctx.plugin(SystemPrompt)
+  await ctx.plugin(ToolRuntime)
   await ctx.plugin(SkillRegistry)
   const fiber = await ctx.plugin(PharmaProductFacts)
   const id = SessionId('pharma-product-facts-test')
@@ -74,13 +79,18 @@ describe('experimental pharma-product-facts bundle plugin', () => {
     const loaded = await ctx.skills.get('pharma-product-facts')
     expect(loaded?.content.startsWith('---')).toBe(false)
     expect(loaded?.content).toContain('# 处方药产品事实 Skill')
-    expect(loaded?.content).toContain("python3 '<skill-dir>/scripts/fetch_facts.py'")
-    expect(loaded?.content).toContain('不要发现、读取或加载外部 `med-online-kb/SKILL.md`')
-    expect(loaded?.content).not.toContain('HERMES_SKILL_DIR')
+    expect(loaded?.content).toContain('pharma_product_facts_fetch_source')
+    expect(loaded?.content).toContain('pharma_product_facts_finalize')
+    expect(loaded?.content).not.toMatch(/HERMES_HOME|med-online-kb|document-parser/)
     expect(loaded?.resourceBase).toEqual({ kind: 'directory', path: resourcePath })
-    expect((await readdir(resourcePath)).sort()).toEqual(['SKILL.md', 'references', 'scripts'])
+    expect((await readdir(resourcePath)).sort()).toEqual(['SKILL.md', 'references'])
+    await expect(access(new URL('../assets/pharma-product-facts/scripts/', import.meta.url))).rejects.toThrow()
     await expect(access(new URL('../assets/pharma-product-facts/eval/', import.meta.url))).rejects.toThrow()
     await expect(access(new URL('../assets/pharma-product-facts/tests/', import.meta.url))).rejects.toThrow()
+    expect(ctx.tools.schemas().map(schema => schema.name)).toEqual([
+      FETCH_SOURCE_TOOL,
+      FINALIZE_TOOL,
+    ])
 
     const routed = await prepare(ctx, agent, [userMessage('德瑞妥的适应症有哪些？')])
     expect(routed.kind === 'enter' && routed.messages.at(-1)?.content).toEqual([
@@ -89,6 +99,7 @@ describe('experimental pharma-product-facts bundle plugin', () => {
 
     await fiber.dispose()
     expect(await ctx.skills.list()).toEqual([])
+    expect(ctx.tools.schemas()).toEqual([])
     const afterDispose = await prepare(ctx, agent, [userMessage('德瑞妥的适应症有哪些？')])
     expect(afterDispose.kind === 'enter' && afterDispose.messages).toHaveLength(1)
   })
@@ -185,7 +196,7 @@ describe('experimental pharma-product-facts bundle plugin', () => {
     const unwrapped = loader.unwrapExports(PharmaProductFacts) as Record<string, unknown>
     expect(unwrapped).toBe(PharmaProductFacts)
     expect(unwrapped.name).toBe('pharma-product-facts')
-    expect(unwrapped.inject).toEqual(['skills', 'agents'])
+    expect(unwrapped.inject).toEqual(['skills', 'agents', 'tools'])
     expect(typeof unwrapped.apply).toBe('function')
   })
 })

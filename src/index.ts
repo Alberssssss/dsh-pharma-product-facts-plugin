@@ -13,7 +13,11 @@ import {
   type SkillDefinition,
   type SkillProvider,
 } from '@deepseek-ai/dsh-skill'
+import { resolveConfig, type Config as PluginConfig } from './config.ts'
 import { registerPharmaProductFactsRouter } from './router.ts'
+import { registerPharmaProductFactsTools } from './tools.ts'
+
+export { Config, DEFAULT_CONFIG, resolveConfig, type ResolvedConfig } from './config.ts'
 
 const PROVIDER_NAME = 'pharma-product-facts'
 const SKILL_BODY_URL = new URL('../assets/pharma-product-facts/SKILL.md', import.meta.url)
@@ -54,14 +58,17 @@ const provider: SkillProvider = {
 
 /** Cordis plugin name and bundle row id. */
 export const name = 'pharma-product-facts'
-/** Services required by the provider and pre-step router. */
-export const inject = ['skills', 'agents']
+/** Services required by the provider, native tools, and pre-step router. */
+export const inject = ['skills', 'agents', 'tools']
 
 /**
- * Register the immutable provider and soft router in one plugin fiber.
- * @param ctx - Cordis context carrying the skill and agent services.
+ * Register the immutable provider, DSH-native tools, and soft router in one plugin fiber.
+ * @param ctx - Cordis context carrying the skill, agent, and tool services.
+ * @param config - Validated transport and evidence limits for this row.
  */
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: PluginConfig = {}): void {
+  const resolved = resolveConfig(config)
   ctx.skills.registerProvider(() => provider)
+  registerPharmaProductFactsTools(ctx, resolved)
   registerPharmaProductFactsRouter(ctx)
 }

@@ -1,7 +1,7 @@
 {
   "name": "dsh-pharma-product-facts",
-  "version": "0.1.1",
-  "description": "DSH bundle containing the pharma-product-facts skill and its soft router",
+  "version": "0.2.0",
+  "description": "Self-contained DSH bundle for verified pharma product facts, its skill, tools, and soft router",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -45,6 +45,7 @@
   "packageManager": "pnpm@11.7.0",
   "scripts": {
     "build": "tsdown && tsc -p tsconfig.json --emitDeclarationOnly",
+    "prepare": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -61,7 +62,13 @@
     "@deepseek-ai/dsh-invariants": "^0.1.0-rc.8",
     "@deepseek-ai/dsh-llm": "^0.1.0-rc.8",
     "@deepseek-ai/dsh-session": "^0.1.0-rc.8",
-    "@deepseek-ai/dsh-skill": "^0.1.0-rc.8"
+    "@deepseek-ai/dsh-skill": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.8"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "html-to-text": "^10.0.1",
+    "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.1",
@@ -71,6 +78,9 @@
     "@deepseek-ai/dsh-llm": "0.1.0-rc.8",
     "@deepseek-ai/dsh-session": "0.1.0-rc.8",
     "@deepseek-ai/dsh-skill": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.8",
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.8",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.8",
     "tsdown": "^0.22.2",
