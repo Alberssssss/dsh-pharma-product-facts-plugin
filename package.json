@@ -45,11 +45,10 @@
   "packageManager": "pnpm@11.7.0",
   "scripts": {
     "build": "tsdown && tsc -p tsconfig.json --emitDeclarationOnly",
-    "prepare": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "pack:check": "pnpm pack --dry-run"
+    "pack:check": "pnpm run build && pnpm pack --dry-run"
   },
   "dsh": {
     "bundle": {

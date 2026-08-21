@@ -22,14 +22,7 @@ dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 
 安装后重启 `web` profile Host 并新建会话。旧会话会保留其创建时的组成和 skill 正文。
 
-仓库既提交了预构建 `lib/`，也提供 `prepare` 以保证 Git 源码可以独立重建。pnpm 10+ 可能要求 profile 所有者允许该构建脚本。如果 DSH 报告 build 被阻止，请把错误中打印的精确软件包键加入 profile 的 `pnpm-workspace.yaml`：
-
-```yaml
-allowBuilds:
-  '<pnpm 打印的精确软件包键>': true
-```
-
-请逐字粘贴该键；pnpm 11 打印的内容可能包含解析后的 Git URL 和 commit，而不只是软件包名。然后重复同一安装操作。构建授权等同于允许仓库代码在安装阶段执行；适合生产使用时可固定已评审 commit：
+仓库提交了经过验证的预构建 `lib/`，且不声明安装期脚本，因此全新 DSH profile 可以安装该 Git 包，无需为 pnpm 增加 `allowBuilds` 例外。源码 checkout 仍可通过 `pnpm run build` 独立构建。适合生产使用时可固定已评审 commit：
 
 ```text
 github:Alberssssss/dsh-pharma-product-facts-plugin#<commit>
@@ -99,7 +92,7 @@ dsh plugin --profile web remove dsh-pharma-product-facts
 
 ## 开发与验证
 
-该 Git 仓库完全独立：所有软件包版本都是普通 registry 范围，没有 `workspace:` 依赖，`prepare` 可以只基于本 checkout 构建。
+该 Git 仓库完全独立：所有软件包版本都是普通 registry 范围，没有 `workspace:` 依赖，`pnpm run build` 可以只基于本 checkout 构建。Git 安装直接使用已提交的 `lib/`，不会执行依赖生命周期脚本。
 
 ```sh
 pnpm install

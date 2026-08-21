@@ -1,4 +1,4 @@
-import { access, readdir } from 'node:fs/promises'
+import { access, readFile, readdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
@@ -102,6 +102,15 @@ describe('experimental pharma-product-facts bundle plugin', () => {
     expect(ctx.tools.schemas()).toEqual([])
     const afterDispose = await prepare(ctx, agent, [userMessage('德瑞妥的适应症有哪些？')])
     expect(afterDispose.kind === 'enter' && afterDispose.messages).toHaveLength(1)
+  })
+
+  it('ships prebuilt runtime files without a Git-install lifecycle script', async () => {
+    const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as {
+      scripts?: Record<string, string>
+    }
+    expect(manifest.scripts?.prepare).toBeUndefined()
+    expect(manifest.scripts?.build).toBe('tsdown && tsc -p tsconfig.json --emitDeclarationOnly')
+    await expect(access(new URL('../lib/index.js', import.meta.url))).resolves.toBeUndefined()
   })
 
   it.each([

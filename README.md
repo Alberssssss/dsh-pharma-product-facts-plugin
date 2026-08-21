@@ -22,14 +22,7 @@ dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 
 Restart the `web` profile Host and create a new session. Existing sessions retain the composition and skill body with which they were created.
 
-This repository commits prebuilt `lib/` files and also defines `prepare` for reproducible Git-source builds. pnpm 10+ may require the profile owner to allow this package's build script. If DSH reports a blocked build, add the exact package key it prints to the profile's `pnpm-workspace.yaml`:
-
-```yaml
-allowBuilds:
-  '<exact package key printed by pnpm>': true
-```
-
-Paste that key exactly; pnpm 11 may include the resolved Git URL and commit rather than only the package name. Then repeat the same install action. Treat build permission as permission to execute repository code and pin a reviewed commit when appropriate:
+This repository commits verified prebuilt `lib/` files and declares no install-time scripts, so a clean DSH profile can install the Git package without a pnpm `allowBuilds` exception. Source checkouts remain independently buildable with `pnpm run build`. Pin a reviewed commit when appropriate:
 
 ```text
 github:Alberssssss/dsh-pharma-product-facts-plugin#<commit>
@@ -99,7 +92,7 @@ dsh plugin --profile web remove dsh-pharma-product-facts
 
 ## Development and verification
 
-The Git repository is independent: package versions are ordinary registry ranges, there are no `workspace:` dependencies, and `prepare` builds from this checkout alone.
+The Git repository is independent: package versions are ordinary registry ranges, there are no `workspace:` dependencies, and `pnpm run build` builds from this checkout alone. Git installs use the committed `lib/` artifacts and execute no dependency lifecycle script.
 
 ```sh
 pnpm install
