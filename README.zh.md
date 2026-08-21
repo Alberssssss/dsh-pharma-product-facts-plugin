@@ -45,6 +45,8 @@ dsh --profile web --dump-config
 
 Skill 只用 DSH `web_search` 发现候选官方 URL；搜索摘要不能作为说明书证据。标准 DSH 基础 profile 已提供 `web_search`，实时发现仍要求其已配置的搜索 provider 可用。
 
+`hcp_focus_card` 的规范输入只使用 `clinical_focus`。为避免模型冗余字段触发长时间重试，finalizer 还会容忍一种 `listed` `label_boundary`：其 evidence id 和精确范围原文必须与某条关注点完全重复。该重复对象会被校验但不会渲染；`not_listed`、无关边界及其他混合模式输入仍会失败。模式字段纠正只复用现有 evidence，不会重新搜索或抓取来源。
+
 ## 可选的 OpenAI 搜索配套插件
 
 本 bundle 不打包也不选择网页搜索后端。它消费稳定的 DSH `web_search` 工具，可以搭配任何已正确配置且可用的 provider。若要让该工具通过 OpenAI Responses 原生 Web Search 搜索，请安装配套 bundle：

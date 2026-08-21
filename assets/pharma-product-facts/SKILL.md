@@ -42,9 +42,11 @@ metadata:
    ```
 
    工具返回 `status: "verified"` 后，才可使用其中的 `evidence_id` 与正文。若返回 `rejected`，换另一条真实官方 URL；不要改用聚合站、模型记忆或本地文件。
-4. 从已验证正文复制支持目标字段的最小精确原文。不要补写正文中没有的剂量、数字、适用人群或身份关系。
-5. 选择输出模式并调用 `pharma_product_facts_finalize`。该调用必须是本轮最后一个工具动作。
+4. 从已验证正文复制支持目标字段的最小精确原文。不要补写正文中没有的剂量、数字、适用人群或身份关系。一旦已有来源覆盖全部目标字段，立即停止继续搜索或抓取。
+5. 选择输出模式并调用 `pharma_product_facts_finalize`。每次只提交该模式使用的字段，其他模式字段必须省略，不能传空数组或多余对象。该调用必须是本轮最后一个业务动作。
 6. finalizer 成功后，最终 assistant 内容必须逐字等于返回对象的 `answer`，不得添加前言、结论、Markdown 包裹、验收状态或第二版答案。
+
+如果 finalizer 只报告模式字段错误，最多立即纠正参数并重试 finalizer 一次；必须复用已有 evidence，不得再次调用 `web_search` 或来源工具。纠正后仍失败时停止工具调用，不进入循环重试。
 
 ## 来源与身份规则
 
@@ -87,6 +89,21 @@ metadata:
 ### `hcp_focus_card`
 
 用于无患者参数的医生关注点，必须给 3–5 条 `clinical_focus`。每条包含简洁关注点、支持它的精确原文和 evidence id。关注点中的数字与英文缩写必须原样出现在引用中。
+
+规范调用只能包含 `mode`、`product`、`title` 和 `clinical_focus`；必须省略 `facts`、`label_boundary` 与 `failure_message`：
+
+```json
+{
+  "mode": "hcp_focus_card",
+  "product": "产品名",
+  "title": "产品名 HCP 关注",
+  "clinical_focus": [
+    { "text": "关注点一", "quote": "支持关注点一的精确原文", "evidence_id": "ev-..." },
+    { "text": "关注点二", "quote": "支持关注点二的精确原文", "evidence_id": "ev-..." },
+    { "text": "关注点三", "quote": "支持关注点三的精确原文", "evidence_id": "ev-..." }
+  ]
+}
+```
 
 ### `label_boundary`
 

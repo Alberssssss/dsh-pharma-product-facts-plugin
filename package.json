@@ -1,6 +1,6 @@
 {
   "name": "dsh-pharma-product-facts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Self-contained DSH bundle for verified pharma product facts, its skill, tools, and soft router",
   "keywords": [
     "deepseek-harness",

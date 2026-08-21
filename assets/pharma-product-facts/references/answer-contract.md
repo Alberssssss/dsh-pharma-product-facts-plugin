@@ -53,6 +53,8 @@
 
 必须 3–5 条，总计不超过 400 个规范化字符。关注点中的数字和英文缩写必须出现在对应引用中。
 
+规范输入只包含 `mode`、`product`、`title` 与 `clinical_focus`，不提交 `facts`、`label_boundary` 或 `failure_message`。为避免模型因冗余字段进入重试循环，finalizer 只额外容忍一种情况：`label_boundary.approval_status` 为 `listed`，且其 `evidence_id` 与规范化后的 `scope_quote` 完全重复某条 `clinical_focus` 证据。该重复对象仅用于校验，不会生成第二种输出；`not_listed` 或不重复的边界对象仍会被拒绝。
+
 ## 核准用途边界
 
 ```json
@@ -81,3 +83,5 @@
 ```
 
 接受 2–4 个非空文本行；其他数量会使用包内安全默认文本。任何模式都会拒绝本地路径、凭据样式、内部工具名与执行过程叙述。
+
+若 finalizer 返回模式字段错误，只能复用当前 evidence 立即纠正一次参数，不得重新搜索或抓取来源。纠正后仍失败时停止工具调用。

@@ -195,7 +195,7 @@ function focusRows(
   store: EvidenceStore,
   scope: string,
   product: string,
-): { lines: string[]; records: EvidenceRecord[] } {
+): { items: FocusInput[]; lines: string[]; records: EvidenceRecord[] } {
   const focus = input.clinical_focus || []
   if (focus.length < 3 || focus.length > 5) throw new Error('hcp_focus_card requires 3-5 clinical_focus items')
   const records: EvidenceRecord[] = []
@@ -210,7 +210,35 @@ function focusRows(
     return text
   })
   if (lines.join('').length > 400) throw new Error('hcp_focus_card exceeds its 400-character budget')
-  return { lines, records }
+  return { items: focus, lines, records }
+}
+
+/**
+ * Accept a model-redundant listed boundary only when it repeats one validated focus quotation.
+ * The duplicate is validation-only and never adds another public claim to the HCP card.
+ */
+function validateRedundantHcpBoundary(
+  boundary: LabelBoundaryInput | undefined,
+  focus: readonly FocusInput[],
+  store: EvidenceStore,
+  scope: string,
+  product: string,
+): void {
+  if (boundary === undefined) return
+  if (boundary.approval_status !== 'listed') {
+    throw new Error('hcp_focus_card accepts only a redundant listed label_boundary')
+  }
+  const questionedUse = requiredLine(boundary.questioned_use, 'label_boundary.questioned_use', 100)
+  const scopeQuote = requiredLine(boundary.scope_quote, 'label_boundary.scope_quote', 4000)
+  const duplicatesFocus = focus.some(item =>
+    item.evidence_id === boundary.evidence_id && line(item.quote) === scopeQuote)
+  if (!duplicatesFocus) {
+    throw new Error('hcp_focus_card label_boundary must duplicate one clinical_focus quote and evidence_id')
+  }
+  const verified = evidenceFor(store, scope, boundary.evidence_id, product, scopeQuote)
+  if (!verified.quote.includes(questionedUse)) {
+    throw new Error('hcp_focus_card listed use is not present in the duplicated clinical_focus quote')
+  }
 }
 
 function renderSources(records: readonly EvidenceRecord[]): { lines: string[]; urls: string[] } {
@@ -249,10 +277,11 @@ function hcpFocusAnswer(
   scope: string,
 ): FinalizedAnswer {
   const { product, title } = identity(input)
-  if ((input.facts || []).length > 0 || input.label_boundary !== undefined) {
-    throw new Error('hcp_focus_card accepts clinical_focus only')
+  if ((input.facts || []).length > 0) {
+    throw new Error('hcp_focus_card does not accept facts')
   }
   const focus = focusRows(input, store, scope, product)
+  validateRedundantHcpBoundary(input.label_boundary, focus.items, store, scope, product)
   const sources = renderSources(focus.records)
   const answer = `${[
     title,

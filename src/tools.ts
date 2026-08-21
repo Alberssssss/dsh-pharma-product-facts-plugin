@@ -147,7 +147,7 @@ export function registerPharmaProductFactsTools(
 
   ctx.tools.register(defineTool({
     name: FINALIZE_TOOL,
-    description: 'Validate exact quotations against official evidence fetched in this DSH session and render the canonical public pharma-product-facts answer. Call this last and copy its answer exactly.',
+    description: 'Validate exact quotations against official evidence fetched in this DSH session and render the canonical public pharma-product-facts answer. Mode-specific fields are mutually exclusive. Call this last and copy its answer exactly; correct a mode-field error with existing evidence instead of searching again.',
     parameters: {
       mode: {
         type: 'string',
@@ -160,13 +160,29 @@ export function registerPharmaProductFactsTools(
           'boundary_or_failure',
         ],
         required: true,
+        description: 'Select one output layout, then send only that mode\'s input field.',
       },
-      product: { type: 'string' },
-      title: { type: 'string' },
-      facts: { type: 'array', items: factSchema },
-      clinical_focus: { type: 'array', items: focusSchema },
-      label_boundary: boundarySchema,
-      failure_message: { type: 'array', items: { type: 'string' } },
+      product: { type: 'string', description: 'Required outside boundary_or_failure; exact product used to fetch evidence.' },
+      title: { type: 'string', description: 'Optional public title containing the exact product identity.' },
+      facts: {
+        type: 'array',
+        items: factSchema,
+        description: 'Only for direct_field, product_card, or expanded_label; omit for every other mode.',
+      },
+      clinical_focus: {
+        type: 'array',
+        items: focusSchema,
+        description: 'Only for hcp_focus_card; provide 3-5 items and omit facts, label_boundary, and failure_message.',
+      },
+      label_boundary: {
+        ...boundarySchema,
+        description: 'Only for label_boundary; omit for every other mode.',
+      },
+      failure_message: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Only for boundary_or_failure; provide 2-4 short lines and omit evidence fields.',
+      },
     },
     output: {
       schema: {

@@ -45,6 +45,8 @@ Loading the plugin also registers these model-visible tools:
 
 The skill uses DSH `web_search` only to discover candidate official URLs. Search snippets are not accepted as label evidence. The standard DSH base profile already exposes `web_search`; its configured search provider must be usable for live discovery.
 
+`hcp_focus_card` normally accepts only `clinical_focus`. To prevent a redundant model field from causing a long retry loop, the finalizer also tolerates a `listed` `label_boundary` only when its evidence id and exact scope quotation duplicate one focus item. The duplicate is validated but not rendered; `not_listed`, unrelated boundaries, and other mixed-mode inputs still fail. A mode-field correction reuses existing evidence and does not restart search or source retrieval.
+
 ## Optional OpenAI search companion
 
 This bundle does not package or select a web-search backend. It consumes the stable DSH `web_search` tool and works with any usable configured provider. To route that tool through OpenAI Responses native Web Search, install the companion bundle:

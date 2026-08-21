@@ -157,6 +157,26 @@ describe('HCP focus answers', () => {
     expect(result.answer).toContain('临床关注（说明书衍生，非个体化）')
     expect(result.answer).toContain('关注发生率5%')
     expect(result.source_urls).toHaveLength(1)
+
+    const redundantListedBoundary = finalizeAnswer({
+      mode: 'hcp_focus_card',
+      product: '贝乐林',
+      title: '贝乐林 HCP 关注',
+      facts: [],
+      failure_message: [],
+      clinical_focus: [
+        { text: '关注每日一次用法', quote: '每日一次。', evidence_id: id1 },
+        { text: '关注 GLP-1 监测', quote: 'GLP-1 监测。', evidence_id: id1 },
+        { text: '关注发生率5%', quote: '发生率为5%。', evidence_id: id1 },
+      ],
+      label_boundary: {
+        questioned_use: '每日一次',
+        approval_status: 'listed',
+        scope_quote: '每日一次。',
+        evidence_id: id1,
+      },
+    }, store, 'session-a')
+    expect(redundantListedBoundary).toEqual(result)
   })
 
   it('rejects invalid focus counts, extra fields, budgets, and unsupported tokens', () => {
@@ -174,11 +194,19 @@ describe('HCP focus answers', () => {
     expect(() => finalizeAnswer({ ...base, facts: [
       { field: '字段', quote: '每日一次。', evidence_id: id1 },
     ], clinical_focus: [...base.clinical_focus!, { text: '三项关注', quote: 'GLP-1 监测。', evidence_id: id1 }] }, store, 'session-a'))
-      .toThrow('accepts clinical_focus only')
+      .toThrow('does not accept facts')
     expect(() => finalizeAnswer({ ...base, label_boundary: {
       questioned_use: '减重', approval_status: 'not_listed', scope_quote: '每日一次。', evidence_id: id1,
     }, clinical_focus: [...base.clinical_focus!, { text: '三项关注', quote: 'GLP-1 监测。', evidence_id: id1 }] }, store, 'session-a'))
-      .toThrow('accepts clinical_focus only')
+      .toThrow('only a redundant listed label_boundary')
+    expect(() => finalizeAnswer({ ...base, label_boundary: {
+      questioned_use: '发生率', approval_status: 'listed', scope_quote: '发生率为5%。', evidence_id: id1,
+    }, clinical_focus: [...base.clinical_focus!, { text: '三项关注', quote: 'GLP-1 监测。', evidence_id: id1 }] }, store, 'session-a'))
+      .toThrow('must duplicate one clinical_focus quote and evidence_id')
+    expect(() => finalizeAnswer({ ...base, label_boundary: {
+      questioned_use: '减重', approval_status: 'listed', scope_quote: '每日一次。', evidence_id: id1,
+    }, clinical_focus: [...base.clinical_focus!, { text: '三项关注', quote: 'GLP-1 监测。', evidence_id: id1 }] }, store, 'session-a'))
+      .toThrow('listed use is not present in the duplicated clinical_focus quote')
     expect(() => finalizeAnswer({ ...base, clinical_focus: [
       ...base.clinical_focus!, { text: '发生率10%', quote: '发生率为5%。', evidence_id: id1 },
     ] }, store, 'session-a')).toThrow('unsupported token: 10%')

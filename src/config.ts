@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG: Readonly<ResolvedConfig> = Object.freeze({
   maxRedirects: 3,
   maxEvidenceScopes: 64,
   maxEvidenceRecordsPerScope: 24,
-  userAgent: 'dsh-pharma-product-facts/0.2 (+https://github.com/Alberssssss/dsh-pharma-product-facts-plugin)',
+  userAgent: 'dsh-pharma-product-facts/0.2.1 (+https://github.com/Alberssssss/dsh-pharma-product-facts-plugin)',
 })
 
 /** Cordis configuration schema with deployment-safe defaults. */

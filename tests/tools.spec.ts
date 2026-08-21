@@ -46,6 +46,18 @@ describe('DSH-native pharma tools', () => {
       now: () => new Date('2026-08-21T00:00:00Z'),
     })
     expect(ctx.tools.schemas().map(schema => schema.name)).toEqual([FETCH_SOURCE_TOOL, FINALIZE_TOOL])
+    expect(ctx.tools.schemas().find(schema => schema.name === FINALIZE_TOOL)).toMatchObject({
+      description: expect.stringContaining('Mode-specific fields are mutually exclusive'),
+      parameters: {
+        properties: {
+          mode: { description: expect.stringContaining('send only that mode') },
+          facts: { description: expect.stringContaining('Only for direct_field') },
+          clinical_focus: { description: expect.stringContaining('omit facts, label_boundary') },
+          label_boundary: { description: expect.stringContaining('Only for label_boundary') },
+          failure_message: { description: expect.stringContaining('Only for boundary_or_failure') },
+        },
+      },
+    })
 
     const fetched = await call(FETCH_SOURCE_TOOL, {
       url: 'https://www.cde.org.cn/label',
