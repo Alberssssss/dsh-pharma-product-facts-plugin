@@ -75,6 +75,7 @@ describe('experimental pharma-product-facts bundle plugin', () => {
     expect(loaded?.content.startsWith('---')).toBe(false)
     expect(loaded?.content).toContain('# 处方药产品事实 Skill')
     expect(loaded?.content).toContain("python3 '<skill-dir>/scripts/fetch_facts.py'")
+    expect(loaded?.content).toContain('不要发现、读取或加载外部 `med-online-kb/SKILL.md`')
     expect(loaded?.content).not.toContain('HERMES_SKILL_DIR')
     expect(loaded?.resourceBase).toEqual({ kind: 'directory', path: resourcePath })
     expect((await readdir(resourcePath)).sort()).toEqual(['SKILL.md', 'references', 'scripts'])

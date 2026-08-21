@@ -4,7 +4,19 @@
 
 独立 DSH profile 组合包，把 `pharma-product-facts` skill（技能）提供方及其 `agent/pre-step` 软 router 作为同一个 Cordis 插件安装。该组合包只贡献一个 `pharma-product-facts` 配置项，因此安装、停用、重载和移除会同时作用于两项贡献。
 
-## 单命令安装
+## 通过 Web UI 或终端安装
+
+### DSH Web UI
+
+在 Web UI 的插件/软件包安装输入框中，只粘贴下面这个软件包定位符：
+
+```text
+github:Alberssssss/dsh-pharma-product-facts-plugin
+```
+
+不要把完整终端命令粘贴到该输入框。UI 会把输入值交给包管理器，因此完整命令会被误解析成格式错误的软件包定位符。
+
+### 终端
 
 用一条命令把 skill 和 router 同时安装到 `web` profile：
 
@@ -13,6 +25,16 @@ dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 ```
 
 仓库已提交构建后的 `lib/`，并且没有安装时构建脚本，因此通过 Git 安装不需要 pnpm 构建授权。
+
+无论使用哪种安装方式，成功后都要重启 `web` profile Host，并新建会话。已有会话会保留其创建时的组成。
+
+pnpm 可能提示本外部组合包的 DSH peer dependencies 在 profile 目录中缺失。DSH 会按设计通过安装侧维护的 profile module fallback 提供这些核心包，以确保所有插件共享 Host 的同一个 Cordis 实例；不要为了消除包管理器警告而在 profile 中重复安装 DSH 核心包。请用 `dsh --profile web --dump-config` 核对实际组成，并确认 `pharma-product-facts` 配置行可以加载。
+
+## 让模型看到 skill
+
+请选择会挂载 `@deepseek-ai/dsh-tool-skill` 的 agent preset，例如随 DSH 提供的 `standard` 或 `code`。`minimal` preset 按设计不挂载该 Consumer。把本组合包安装到 Host 层会发布 provider 和 router，但不会替一个主动省略 skill Consumer 的 preset 增加它。
+
+模型可调用的是共享 `skill` 工具，而不是以仓库命名的工具。原生工具会话使用 `skill({ name: "pharma-product-facts" })` 加载本 skill；Code Mode 通过 `run_code` 中的 `tools.skill(...)` 发起同一次调用。Web 输入框提供 skill 菜单时，也可键入 `/pharma-product-facts ` 确定性调用。不会出现名为 `dsh-pharma-product-facts-plugin` 的工具，这是正常行为。
 
 ## 生命周期
 
@@ -42,7 +64,9 @@ Router 应用以下规则：
 
 ## 外部要求
 
-该组合包在发现和路由层面自包含。执行包内医学工作流仍需兼容 Hermes 的 `HERMES_HOME`，以及已部署的 `med-online-kb` 和 `document-parser` 资源。外部资源缺失不会阻止插件加载，但 skill 的来源状态规则会限制它可以安全交付的内容。
+该组合包在发现和路由层面自包含。执行包内医学工作流仍需兼容 Hermes 的 `HERMES_HOME`，以及已部署的 `med-online-kb` 和 `document-parser` 资源。通过 `med-online-kb` 实时检索 CDE 还需要 Host 环境中的 `WISEDIAG_API_KEY`。外部资源或凭据缺失不会阻止插件加载，但 skill 的来源状态规则会限制它可以安全交付的内容。
+
+本包只把 `pharma-product-facts` 注册为 skill。包内 `fetch_facts.py` wrapper 可以执行已部署的 `med-online-kb/scripts/med_search.py`，但不会把 `med-online-kb` 注册或加载成第二个 skill。包内指令已明确要求：检索失败后不得再发现或读取外部 `med-online-kb/SKILL.md`。这属于模型指令，不是文件系统访问控制；agent 最终能读取哪些本地路径，仍由当前 DSH 文件策略决定。
 
 ## 模型体验
 

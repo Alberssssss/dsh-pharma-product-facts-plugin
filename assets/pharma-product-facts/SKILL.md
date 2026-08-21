@@ -39,6 +39,7 @@ metadata:
 
 - 从已加载的 `<skill_resources>` 读取 `Base directory for this skill`；下文用 `<skill-dir>` 指代该绝对目录，运行包内脚本前必须替换成真实目录。
 - 包内只提供本 skill 的指令、引用资料和确定性脚本；运行检索与解析仍依赖外部 `HERMES_HOME`、`med-online-kb` 和 `document-parser` 部署。
+- 包内 `scripts/fetch_facts.py` 是 DSH 调用 `med-online-kb` 的唯一入口。不要发现、读取或加载外部 `med-online-kb/SKILL.md`，也不要另行调用 `med-online-kb` skill；wrapper 已负责定位并执行所需的 `med_search.py`。wrapper 失败后直接按下文来源状态分流，不检查外部 skill 目录。
 - 优先取得国家药监部门公开的最新版说明书或注册文件，并核对商品名、通用名、剂型、企业、规格和适用地区。
 - `references/product-name-map.md` 只是六个常用商品名的检索起点，不是适应症、剂量或疗效的事实来源。
 - 六个在售产品走本 skill 的完整确定性契约；其他产品转 `med-online-kb` 做通用权威检索，不自动套用本产品族的话术或实体映射。

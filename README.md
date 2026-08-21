@@ -4,7 +4,19 @@ English | [中文](README.zh.md)
 
 Standalone DSH profile bundle that installs the `pharma-product-facts` skill provider and its `agent/pre-step` soft router as one Cordis plugin. The bundle contributes one `pharma-product-facts` row, so installation, disablement, reload, and removal apply to both contributions together.
 
-## One-command installation
+## Install from the Web UI or terminal
+
+### DSH Web UI
+
+In the Web UI's plugin/package install field, paste only this package locator:
+
+```text
+github:Alberssssss/dsh-pharma-product-facts-plugin
+```
+
+Do not paste the terminal command into that field. The UI passes its value to the package manager, so a complete command would be interpreted as a malformed package locator.
+
+### Terminal
 
 Install both the skill and router into the `web` profile with one command:
 
@@ -13,6 +25,16 @@ dsh plugin --profile web add github:Alberssssss/dsh-pharma-product-facts-plugin
 ```
 
 The repository commits its built `lib/` output and has no install-time build script, so Git installation does not require pnpm build approval.
+
+After either installation path, restart the `web` profile Host and create a new session. Existing sessions retain the composition with which they were created.
+
+pnpm can warn that this external bundle's DSH peer dependencies are missing from the profile directory. DSH intentionally supplies those core packages through its installation-owned profile module fallback so every plugin shares the Host's Cordis instance; do not install duplicate DSH core packages into the profile to silence the package-manager warning. Verify the actual composition with `dsh --profile web --dump-config` and check that the `pharma-product-facts` row loads.
+
+## Make the skill model-visible
+
+Use an agent preset that mounts `@deepseek-ai/dsh-tool-skill`, such as the shipped `standard` or `code` preset. The `minimal` preset intentionally does not mount that Consumer. Installing this bundle at the Host layer publishes the provider and router, but does not add the skill Consumer to a preset that omitted it.
+
+The callable model tool is the shared `skill` tool, not a repository-named tool. A native-tool session loads this bundle with `skill({ name: "pharma-product-facts" })`; Code Mode reaches the same call through `run_code` and `tools.skill(...)`. The Web composer can also invoke it deterministically with `/pharma-product-facts ` when its skill menu is available. No tool named `dsh-pharma-product-facts-plugin` is expected.
 
 ## Lifecycle
 
@@ -42,7 +64,9 @@ The router applies these rules:
 
 ## External requirements
 
-The bundle is self-contained for discovery and routing. Executing the packaged medical workflow still requires a Hermes-compatible `HERMES_HOME` plus deployed `med-online-kb` and `document-parser` resources. Missing external resources do not prevent the plugin from loading, but the skill's source-status rules then limit what it can safely deliver.
+The bundle is self-contained for discovery and routing. Executing the packaged medical workflow still requires a Hermes-compatible `HERMES_HOME` plus deployed `med-online-kb` and `document-parser` resources. Live CDE retrieval through `med-online-kb` also requires `WISEDIAG_API_KEY` in the Host environment. Missing external resources or credentials do not prevent the plugin from loading, but the skill's source-status rules then limit what it can safely deliver.
+
+Only `pharma-product-facts` is registered as a skill by this package. Its packaged `fetch_facts.py` wrapper may execute the deployed `med-online-kb/scripts/med_search.py`; it does not register or load `med-online-kb` as a second skill. The packaged instructions explicitly tell the model not to discover or read the external `med-online-kb/SKILL.md` after a retrieval failure. This is model guidance, not a filesystem access control; the active DSH file policy still determines which local paths the agent can read.
 
 ## Model Experience
 
