@@ -1,0 +1,1 @@
+# dsh-pharma-product-facts-plugin
