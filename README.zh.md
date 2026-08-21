@@ -45,6 +45,16 @@ dsh --profile web --dump-config
 
 Skill 只用 DSH `web_search` 发现候选官方 URL；搜索摘要不能作为说明书证据。标准 DSH 基础 profile 已提供 `web_search`，实时发现仍要求其已配置的搜索 provider 可用。
 
+## 可选的 OpenAI 搜索配套插件
+
+本 bundle 不打包也不选择网页搜索后端。它消费稳定的 DSH `web_search` 工具，可以搭配任何已正确配置且可用的 provider。若要让该工具通过 OpenAI Responses 原生 Web Search 搜索，请安装配套 bundle：
+
+```sh
+dsh plugin --profile web add github:Alberssssss/dsh-web-search-openai
+```
+
+配套插件只改变来源发现。当前 pharma bundle 仍会自行抓取所引用的 CDE/NMPA 页面或 PDF，核对用户所问产品身份和逐字引文，并负责生成最终答案。安装任一 bundle 都不会强制对话模型调用 skill 或 `web_search`。
+
 ## 运行时安全
 
 - 证据按 DSH agent/session 隔离，并只保存在有界内存中。

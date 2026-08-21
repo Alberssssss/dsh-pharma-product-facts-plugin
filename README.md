@@ -45,6 +45,16 @@ Loading the plugin also registers these model-visible tools:
 
 The skill uses DSH `web_search` only to discover candidate official URLs. Search snippets are not accepted as label evidence. The standard DSH base profile already exposes `web_search`; its configured search provider must be usable for live discovery.
 
+## Optional OpenAI search companion
+
+This bundle does not package or select a web-search backend. It consumes the stable DSH `web_search` tool and works with any usable configured provider. To route that tool through OpenAI Responses native Web Search, install the companion bundle:
+
+```sh
+dsh plugin --profile web add github:Alberssssss/dsh-web-search-openai
+```
+
+The companion changes discovery only. This pharma bundle still fetches the cited CDE/NMPA page or PDF itself, checks the requested product identity and exact quotations, and owns the final answer. Installing either bundle does not force the conversation model to call the skill or `web_search`.
+
 ## Runtime safety
 
 - Evidence is isolated by DSH agent/session and held only in a bounded in-memory store.
